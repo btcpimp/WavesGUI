@@ -10,9 +10,10 @@
      * @param {User} user
      * @param {MultiAccount} multiAccount
      * @param {ModalManager} modalManager
+     * @param {ConfigService} configService
      * @returns {SignInCtrl}
      */
-    const controller = function (Base, $scope, $state, user, multiAccount, modalManager) {
+    const controller = function (Base, $scope, $state, user, multiAccount, modalManager, configService) {
 
         class SignInCtrl extends Base {
 
@@ -101,7 +102,13 @@
 
             _login(userData) {
                 user.login(userData).then(() => {
-                    user.goToActiveState();
+                    const DEXW_LOCKED = configService.get('DEXW_LOCKED');
+
+                    if (DEXW_LOCKED) {
+                        $state.go('migration');
+                    } else {
+                        user.goToActiveState();
+                    }
                 });
             }
 
@@ -121,7 +128,7 @@
         return new SignInCtrl();
     };
 
-    controller.$inject = ['Base', '$scope', '$state', 'user', 'multiAccount', 'modalManager'];
+    controller.$inject = ['Base', '$scope', '$state', 'user', 'multiAccount', 'modalManager', 'configService'];
 
     angular.module('app.signIn').controller('SignInCtrl', controller);
 })();
